@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="project">
+    <description>
+            This is a custom Ant build file which contains a target that
+    		package the web application as a deployable WAR file.
+    </description>
+
+    <target name="makeWAR" description="Bundles the application as a WAR file">
+        <war destfile="UploadServlet30.war"
+        		basedir="WebContent"
+        		needxmlfile="false">
+        </war>
+    </target>
+</project>
