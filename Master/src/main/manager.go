@@ -66,8 +66,8 @@ func (man *Manager) startWorker(w *Worker) {
 		"sudo apt-get -y install git",
 		"git clone https://github.com/drennings/Cloudpass",
 		"sudo apt-get -y install python-pip",
-		"cd Cloudpass & pip install -r requirements.txt",
-		"cd Cloudpass & python itertest.py",
+		"cd Cloudpass/Worker & pip install -r requirements.txt",
+		"cd Cloudpass/Worker & python itertest.py",
 	})
 	if err != nil {
 		fmt.Printf("%s: an error occurred: %s\n", w.Id, err)
