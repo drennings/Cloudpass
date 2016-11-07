@@ -68,7 +68,7 @@ func (man *Manager) startWorker(w *Worker) {
 		"sudo apt-get update",
 		"sudo apt-get -y install git",
 		"git clone https://github.com/drennings/Cloudpass",
-		"cd Cloudpass/Worker && chmod +x make.sh && sudo ./make.sh",
+		"cd Cloudpass/Worker && chmod +x make.sh && sudo ./make.sh &",
 	})
 	if err != nil {
 		fmt.Printf("%s: an error occurred: %s\n", w.Id, err)
