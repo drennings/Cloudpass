@@ -3,6 +3,7 @@ import time
 import hashlib
 import requests
 import json
+import sys
 import threading
 from flask import Flask
 from flask import request
@@ -12,7 +13,7 @@ alphabet = '0123456789'
 length = 8
 
 
-class Job:
+class Worker:
     def __init__(self, worker_id, master_addr,
                  hash_str, hash_type, share, capacity):
         self.worker_id = worker_id
@@ -25,7 +26,11 @@ class Job:
         self.heartbeat_interval = 10
 
     def start(self):
-        self.schedule_heartbeats()
+        """ Start bruteforcing the password while sending heartbeats
+        to the master every self.heartbeat_interval seconds to show we
+        are alive.
+        """
+        set_interval(self.notify_master, self.heartbeat_interval)
 
         # Bruteforce our share of the solution space
         self.time_start = time.time()
@@ -39,21 +44,26 @@ class Job:
                 if self.hash_str == md5.hexdigest():
                     self.solution = sol
                     self.time_stop = time.time()
-
-    def schedule_heartbeats(self):
-        def send_heartbeat():
-            requests.post(self.master_addr, self.toJSON())
-        set_interval(send_heartbeat, self.heartbeat_interval)
+                    self.notify_master()
+                    sys.exit(0)
 
     def notify_master(self):
-        requests.post(self.master_addr, self.solution)
+        """ Sends our state to the master, this is done every
+        'heartbeat_interval' seconds as well as when the solution is found.
+        """
+        requests.post(self.master_addr, self.toJSON())
 
     def toJSON(self):
+        """ Dumps our state to JSON such that we can send it to the master
+        over HTTP.
+        """
         return json.dumps(self, default=lambda o: o.__dict__,
                           sort_keys=True, indent=4)
 
 
 def set_interval(func, sec):
+    """ Repeats a function every 'sec' seconds.
+    """
     def func_wrapper():
         set_interval(func, sec)
         func()
@@ -65,17 +75,19 @@ def set_interval(func, sec):
 # Called by master to start the worker
 @app.route('/start', methods=['POST'])
 def start():
+    """ Called by the master when the worker is created, starts a worker.
+    """
     worker_id = request.args.get('workerId')
     master_addr = request.args('masterAddr')
     hash_str = request.args.get('hash')
     hash_type = request.args.get('type')
     share = request.args('share')
-    capacity = request.args('cap')
+    cap = request.args('cap')
 
-    job = Job(worker_id, master_addr, hash_str, hash_type, share, capacity)
-    job.start()
+    worker = Worker(worker_id, master_addr, hash_str, hash_type, share, cap)
+    worker.start()
 
-    return 'Starting job.'
+    return 'Starting worker.'
 
 if __name__ == "__main__":
     app.run()
