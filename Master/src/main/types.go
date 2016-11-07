@@ -35,7 +35,18 @@ type Job struct {
 
 // Worker represents a single EC2 instance used for a Job.
 type Worker struct {
-	Id    string
-	Share int
-	*Job  // Embedded struct
+	Id              string
+	Share           int
+	PublicIpAddress string
+	*Job            // Embedded struct
+}
+
+// Work represents a unit of work sent to the worker
+type Work struct {
+	Id       string `json:"worker_id"`
+	MasterIp string `json:"master_addr"`
+	Hash     string `json:"hash_str"`
+	HashType string `json:"hash_type"`
+	Share    int    `json:"share"`
+	Capacity int    `json:"cap"`
 }

@@ -2,8 +2,10 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -102,6 +104,11 @@ func (man *Manager) StartJob(job *Job) error {
 		} else {
 			// Now that the worker is created, we tell it to start working
 			man.startWorker(worker)
+
+			// Submit the work to the worker
+			man.submitWork(worker, i, job)
+
+			// Add it to the Workers map for tracking
 			job.Workers[worker.Id] = worker
 		}
 	}
@@ -112,6 +119,7 @@ func (man *Manager) StartJob(job *Job) error {
 
 	// Job was successfully started, add it to the manager
 	man.Jobs[job.Id] = job
+
 	return nil
 }
 
@@ -186,6 +194,9 @@ func (man *Manager) runCommand(worker *Worker, cmd string) error {
 	fmt.Printf("%s: executing command: %s\n", *inst.InstanceId, cmd)
 	addr := fmt.Sprintf("%s:%d", *inst.PublicIpAddress, 22)
 
+	// Store IP for later use
+	worker.PublicIpAddress = *inst.PublicIpAddress
+
 	// Retry SSH until successful
 	var conn *ssh.Client
 	try, max, interval := 1, 5, 10*time.Second
@@ -240,6 +251,41 @@ func (man *Manager) getWorkerInstance(w *Worker) (*ec2.Instance, error) {
 	}
 
 	return nil, fmt.Errorf("Could not find running instance.")
+}
+
+// Send a POST request with a portion of the job to the worker
+func (man *Manager) submitWork(worker *Worker, share int, job *Job) error {
+	resp, err := http.Get("http://myexternalip.com/raw")
+	if err != nil {
+		return err
+	}
+
+	ip, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	work := &Work{
+		Id:       worker.Id,
+		MasterIp: string(ip),
+		Hash:     worker.Hash,
+		HashType: worker.HashType,
+		Share:    share,
+		Capacity: worker.Capacity,
+	}
+
+	workJSON, err := json.Marshal(work)
+	if err != nil {
+		return err
+	}
+
+	resp, err = http.Post(worker.PublicIpAddress+"/start", "application/json", bytes.NewBuffer(workJSON))
+	if err != nil {
+		return err
+	}
+	fmt.Println(resp.StatusCode)
+
+	return nil
 }
 
 // JobFromRecord converts a DynamoDB record to a Job

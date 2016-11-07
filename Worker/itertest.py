@@ -51,6 +51,7 @@ class Worker:
         """ Sends our state to the master, this is done every
         'heartbeat_interval' seconds as well as when the solution is found.
         """
+        print("Notifying master")
         requests.post(self.master_addr, self.toJSON())
 
     def toJSON(self):
