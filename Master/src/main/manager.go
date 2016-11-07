@@ -63,11 +63,10 @@ func (man *Manager) createWorker(job *Job, share int) (*Worker, error) {
 // startWorker sets up the Woker and starts working
 func (man *Manager) startWorker(w *Worker) {
 	err := man.runCommands(w, []string{
+		"sudo apt-get update",
 		"sudo apt-get -y install git",
 		"git clone https://github.com/drennings/Cloudpass",
-		"sudo apt-get -y install python-pip",
-		"cd Cloudpass/Worker & pip install -r requirements.txt",
-		"cd Cloudpass/Worker & python itertest.py",
+		"cd drennings/Cloudpass && ./make.sh",
 	})
 	if err != nil {
 		fmt.Printf("%s: an error occurred: %s\n", w.Id, err)
