@@ -3,15 +3,14 @@ import time
 import hashlib
 import requests
 import json
-import sys
 import threading
 from flask import Flask
 from flask import request
 app = Flask(__name__)
 
 alphabet = '0123456789'
-length = 8
-
+length = 7
+heartbeat = None
 
 class Worker:
     def __init__(self, worker_id, master_addr,
@@ -22,36 +21,66 @@ class Worker:
         self.hash_type = hash_type
         self.share = share
         self.capacity = capacity
-        self.progress = 0
         self.heartbeat_interval = 10
+        self.solution = None
+        self.solutions_tried = 0
+        self.solutions_total = 0
+        for i in range(length+1):
+            self.solutions_total += len(alphabet)**i
 
     def start(self):
         """ Start bruteforcing the password while sending heartbeats
         to the master every self.heartbeat_interval seconds to show we
         are alive.
         """
+        print("Starting bruteforce for hash: " + self.hash_str)
+
         set_interval(self.notify_master, self.heartbeat_interval)
 
         # Bruteforce our share of the solution space
         self.time_start = time.time()
-        for i in range(length):
-            for p in product(alphabet, repeat=i):
-                sol = ''.join(p)
-                md5 = hashlib.md5()
-                sol_ascii_bytes = bytes(sol, 'utf-8')
-                md5.update(sol_ascii_bytes)
 
-                if self.hash_str == md5.hexdigest():
+        for i in range(length+1):
+            for p in product(alphabet, repeat=i):
+                self.solutions_tried += 1
+
+                # Only do our share of the solution space
+                if (self.solutions_tried % self.capacity) != self.share:
+                    continue
+                sol = ''.join(p)
+                hash_func = None
+
+                # Determine hash function
+                if self.hash_type == "md5":
+                    hash_func = hashlib.md5()
+                elif self.hash_type == "sha1":
+                    hash_func = hashlib.sha1()
+
+                sol_ascii_bytes = bytes(sol)
+                hash_func.update(sol_ascii_bytes)
+
+                # Solution not found
+                if self.solutions_tried == self.solutions_total:
+                    print("Did not find solution for hash " + self.hash_str)
+                    self.stop()
+
+                # Solution found
+                if self.hash_str == hash_func.hexdigest():
+                    print("Found solution for hash " + self.hash_str + ": " +
+                          str(sol))
                     self.solution = sol
-                    self.time_stop = time.time()
-                    self.notify_master()
-                    sys.exit(0)
+                    self.stop()
+                    return
+
+    def stop(self):
+        self.time_stop = time.time()
+        self.notify_master()
+        heartbeat.cancel()
 
     def notify_master(self):
         """ Sends our state to the master, this is done every
         'heartbeat_interval' seconds as well as when the solution is found.
         """
-        print("Notifying master")
         requests.post(self.master_addr, self.toJSON())
 
     def toJSON(self):
@@ -68,9 +97,9 @@ def set_interval(func, sec):
     def func_wrapper():
         set_interval(func, sec)
         func()
-    t = threading.Timer(sec, func_wrapper)
-    t.start()
-    return t
+    global heartbeat
+    heartbeat = threading.Timer(sec, func_wrapper)
+    heartbeat.start()
 
 
 # Called by master to start the worker
@@ -78,17 +107,19 @@ def set_interval(func, sec):
 def start():
     """ Called by the master when the worker is created, starts a worker.
     """
-    worker_id = request.args.get('workerId')
-    master_addr = request.args('masterAddr')
-    hash_str = request.args.get('hash')
-    hash_type = request.args.get('type')
-    share = request.args('share')
-    cap = request.args('cap')
+    json = request.get_json()
+    worker_id = json['workerId']
+    master_addr = json['masterAddr']
+    hash_str = json['hash']
+    hash_type = json['type']
+    share = int(json['share'])
+    cap = int(json['cap'])
 
     worker = Worker(worker_id, master_addr, hash_str, hash_type, share, cap)
-    worker.start()
+    t = threading.Thread(target=worker.start)
+    t.start()
 
     return 'Starting worker.'
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=8080)
