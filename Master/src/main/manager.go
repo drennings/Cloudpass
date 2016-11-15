@@ -107,14 +107,14 @@ func (man *Manager) StartJob(job *Job) error {
 			fmt.Println("Starting worker...")
 			err := man.startWorker(worker)
 			if err != nil {
-				fmt.Printf("Error starting worker: %v", err)
+				return fmt.Errorf("Error starting worker: %v", err)
 			}
 
 			fmt.Println("Submitting work...")
 			// Submit the work to the worker
 			err = man.submitWork(worker, i, job)
 			if err != nil {
-				fmt.Printf("Error submitting work: %v", err)
+				return fmt.Errorf("Error submitting work: %v", err)
 			}
 
 			// Add it to the Workers map for tracking
