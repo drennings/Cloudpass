@@ -12,6 +12,7 @@ alphabet = '0123456789'
 length = 7
 heartbeat = None
 
+
 class Worker:
     def __init__(self, worker_id, master_addr,
                  hash_str, hash_type, share, capacity):
@@ -82,7 +83,7 @@ class Worker:
         'heartbeat_interval' seconds as well as when the solution is found.
         """
         print('Pinging master' + str(self.solutions_tried))
-        requests.post(self.master_addr, self.toJSON())
+        requests.post('http://' + self.master_addr + '/status', self.toJSON())
 
     def toJSON(self):
         """ Dumps our state to JSON such that we can send it to the master

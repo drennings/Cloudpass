@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -21,7 +22,7 @@ func NewAPI(port string) *API {
 func (api *API) Serve() error {
 	// Register handlers
 	http.HandleFunc("/", rootHandler)
-	http.HandleFunc("/found", foundHandler)
+	http.HandleFunc("/status", statusHandler)
 
 	// Start serving
 	err := http.ListenAndServe(api.Port, nil)
@@ -32,6 +33,10 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello from /")
 }
 
-func foundHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello from /found")
+func statusHandler(w http.ResponseWriter, r *http.Request) {
+	res, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Printf("Err occurred in status: %v", err)
+	}
+	fmt.Printf("Received status update:%v", res)
 }
