@@ -103,11 +103,14 @@ func (man *Manager) StartJob(job *Job) error {
 			errors = append(errors, err.Error())
 		} else {
 			// Now that the worker is created, we tell it to start working
+			fmt.Println("Starting worker...")
 			man.startWorker(worker)
 
+			fmt.Println("Submitting work...")
 			// Submit the work to the worker
 			man.submitWork(worker, i, job)
 
+			fmt.Println("Tracking progress")
 			// Add it to the Workers map for tracking
 			job.Workers[worker.Id] = worker
 		}
@@ -119,6 +122,8 @@ func (man *Manager) StartJob(job *Job) error {
 
 	// Job was successfully started, add it to the manager
 	man.Jobs[job.Id] = job
+
+	// TODO trackHealth(job)
 
 	return nil
 }
@@ -223,7 +228,7 @@ func (man *Manager) runCommand(worker *Worker, cmd string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("> %s\n", stdoutBuf.String())
+	// fmt.Printf("> %s\n", stdoutBuf.String())
 
 	return nil
 }
@@ -279,11 +284,11 @@ func (man *Manager) submitWork(worker *Worker, share int, job *Job) error {
 		return err
 	}
 
+	fmt.Printf("Submitting work %v", work)
 	resp, err = http.Post(worker.PublicIpAddress+"/start", "application/json", bytes.NewBuffer(workJSON))
 	if err != nil {
 		return err
 	}
-	fmt.Println(resp.StatusCode)
 
 	return nil
 }

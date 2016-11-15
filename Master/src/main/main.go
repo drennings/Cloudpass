@@ -11,22 +11,6 @@ import (
 const pollInterval = 10 * time.Second
 const apiPort = ":8080"
 
-func mainTest() {
-	region := aws.String(os.Getenv("AWS_REGION"))
-	man := NewManager(region)
-	job := JobFromRecord(newRecordAdded())
-	man.StartJob(job)
-
-	// Stop the first worker for this job
-	for _, v := range man.Jobs[job.Id].Workers {
-		man.runCommand(v, "whoami")
-		man.runCommands(v, []string{"touch a", "ls", "pwd", "cd /", "ls"})
-		man.stopWorker(v)
-		break
-	}
-	//man.StopJob(job)
-}
-
 func main() {
 	fmt.Println("Starting...")
 
