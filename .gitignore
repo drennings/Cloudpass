@@ -6,7 +6,7 @@
 # Folders
 _obj
 _test
-Master/deploy
+Master/deploy/secret
 
 # Architecture specific extensions/prefixes
 *.[568vq]
