@@ -6,6 +6,7 @@
 # Folders
 _obj
 _test
+Master/deploy
 
 # Architecture specific extensions/prefixes
 *.[568vq]
@@ -22,3 +23,4 @@ _testmain.go
 *.test
 *.prof
 .ropeproject/
+
