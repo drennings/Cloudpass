@@ -9,7 +9,7 @@ import (
 )
 
 const pollInterval = 10 * time.Second
-const apiPort = ":8080"
+const apiPort = ":80"
 
 func main() {
 	fmt.Println("Starting...")
