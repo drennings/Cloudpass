@@ -63,7 +63,7 @@ func (man *Manager) createWorker(job *Job, share int) (*Worker, error) {
 }
 
 // startWorker sets up the Woker and starts working
-func (man *Manager) startWorker(w *Worker) {
+func (man *Manager) startWorker(w *Worker) error {
 	err := man.runCommands(w, []string{
 		"sudo apt-get update",
 		"sudo apt-get -y install git",
@@ -71,8 +71,9 @@ func (man *Manager) startWorker(w *Worker) {
 		"cd Cloudpass/Worker && chmod +x make.sh && sudo ./make.sh &",
 	})
 	if err != nil {
-		fmt.Printf("%s: an error occurred: %s\n", w.Id, err)
+		return err
 	}
+	return nil
 }
 
 // AttachAPI attaches an API object to the manager
@@ -104,13 +105,18 @@ func (man *Manager) StartJob(job *Job) error {
 		} else {
 			// Now that the worker is created, we tell it to start working
 			fmt.Println("Starting worker...")
-			man.startWorker(worker)
+			err := man.startWorker(worker)
+			if err != nil {
+				fmt.Printf("Error starting worker: %v", err)
+			}
 
 			fmt.Println("Submitting work...")
 			// Submit the work to the worker
-			man.submitWork(worker, i, job)
+			err = man.submitWork(worker, i, job)
+			if err != nil {
+				fmt.Printf("Error submitting work: %v", err)
+			}
 
-			fmt.Println("Tracking progress")
 			// Add it to the Workers map for tracking
 			job.Workers[worker.Id] = worker
 		}
@@ -284,11 +290,12 @@ func (man *Manager) submitWork(worker *Worker, share int, job *Job) error {
 		return err
 	}
 
-	fmt.Printf("Submitting work %v", work)
-	resp, err = http.Post(worker.PublicIpAddress+"/start", "application/json", bytes.NewBuffer(workJSON))
+	workerAddr := fmt.Sprintf("http://%s", worker.PublicIpAddress)
+	resp, err = http.Post(workerAddr+"/start", "application/json", bytes.NewBuffer(workJSON))
 	if err != nil {
 		return err
 	}
+	fmt.Printf("Resp: %#v", resp)
 
 	return nil
 }

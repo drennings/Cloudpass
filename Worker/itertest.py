@@ -111,8 +111,8 @@ def start():
     json = request.get_json()
     worker_id = json['workerId']
     master_addr = json['masterAddr']
-    hash_str = json['hash']
-    hash_type = json['type']
+    hash_str = json['hashStr']
+    hash_type = json['hashType']
     share = int(json['share'])
     cap = int(json['cap'])
 

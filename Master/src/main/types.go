@@ -43,10 +43,10 @@ type Worker struct {
 
 // Work represents a unit of work sent to the worker
 type Work struct {
-	Id       string `json:"worker_id"`
-	MasterIp string `json:"master_addr"`
-	Hash     string `json:"hash_str"`
-	HashType string `json:"hash_type"`
+	Id       string `json:"workerId"`
+	MasterIp string `json:"masterAddr"`
+	Hash     string `json:"hashStr"`
+	HashType string `json:"hashType"`
 	Share    int    `json:"share"`
 	Capacity int    `json:"cap"`
 }
