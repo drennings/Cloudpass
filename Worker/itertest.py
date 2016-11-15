@@ -81,6 +81,7 @@ class Worker:
         """ Sends our state to the master, this is done every
         'heartbeat_interval' seconds as well as when the solution is found.
         """
+        print('Pinging master' + str(self.solutions_tried))
         requests.post(self.master_addr, self.toJSON())
 
     def toJSON(self):
@@ -116,6 +117,10 @@ def start():
     cap = int(json['cap'])
 
     worker = Worker(worker_id, master_addr, hash_str, hash_type, share, cap)
+
+    print('Received request!')
+    print(json)
+
     t = threading.Thread(target=worker.start)
     t.start()
 
