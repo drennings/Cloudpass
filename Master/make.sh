@@ -4,4 +4,7 @@ export SEC_GROUP="sg-e26fb89b"
 export AWS_REGION="us-west-2"
 export INST_TYPE="t2.micro"
 export IMG_ID="ami-d732f0b7"
-go run src/main/*.go
+cd src/main
+go build -o ../../deploy/main
+cd ../..
+./deploy/main

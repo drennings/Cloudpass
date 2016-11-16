@@ -1,4 +1,5 @@
 from itertools import product
+import sys
 import time
 import hashlib
 import requests
@@ -76,14 +77,14 @@ class Worker:
     def stop(self):
         self.time_stop = time.time()
         self.notify_master()
-        heartbeat.cancel()
+        sys.exit()
 
     def notify_master(self):
         """ Sends our state to the master, this is done every
         'heartbeat_interval' seconds as well as when the solution is found.
         """
-        print('Pinging master' + str(self.solutions_tried))
-        requests.post('http://' + self.master_addr + '/status', self.toJSON())
+        res = requests.post('http://' + self.master_addr + '/status', self.toJSON())
+        print("Pinged master at:", self.master_addr, res.status_code, r.text)
 
     def toJSON(self):
         """ Dumps our state to JSON such that we can send it to the master
