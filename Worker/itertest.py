@@ -1,5 +1,5 @@
 from itertools import product
-import sys
+import os
 import time
 import hashlib
 import requests
@@ -79,8 +79,7 @@ class Worker:
         print("Stopping...")
         self.time_stop = time.time()
         self.notify_master()
-        shutdown_server()
-        sys.exit(0)
+        os._exit(1)
 
     def notify_master(self):
         """ Sends our state to the master, this is done every
