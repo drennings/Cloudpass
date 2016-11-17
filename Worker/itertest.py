@@ -79,7 +79,8 @@ class Worker:
         print("Stopping...")
         self.time_stop = time.time()
         self.notify_master()
-        sys.exit()
+        shutdown_server()
+        sys.exit(0)
 
     def notify_master(self):
         """ Sends our state to the master, this is done every
