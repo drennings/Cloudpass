@@ -83,7 +83,8 @@ class Worker:
         """ Sends our state to the master, this is done every
         'heartbeat_interval' seconds as well as when the solution is found.
         """
-        res = requests.post('http://' + self.master_addr + '/status', self.toJSON())
+        res = requests.post('http://' + self.master_addr + '/status',
+                            self.toJSON())
         print("Pinged master at:", self.master_addr, res.status_code, r.text)
 
     def toJSON(self):
