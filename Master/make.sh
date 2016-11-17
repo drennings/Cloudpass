@@ -7,4 +7,4 @@ export IMG_ID="ami-d732f0b7"
 cd src/main
 go build -o ../../deploy/main
 cd ../..
-sudo ./deploy/main
+sudo -E ./deploy/main
