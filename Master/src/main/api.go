@@ -23,6 +23,7 @@ func NewAPI(port string, manager *Manager) *API {
 // Serve starts a webserver with the different handlers
 func (api *API) Serve() error {
 	// Register handlers
+	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/status", statusHandler)
 
 	// Start serving
@@ -40,4 +41,5 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Err occurred in status: %v", err)
 	}
 	fmt.Printf("Received status update:%v", res)
+	fmt.Fprintf(w, "Status update received")
 }

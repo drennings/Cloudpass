@@ -65,6 +65,7 @@ class Worker:
                 if self.solutions_tried == self.solutions_total:
                     print("Did not find solution for hash " + self.hash_str)
                     self.stop()
+                    return
 
                 # Solution found
                 if self.hash_str == hash_func.hexdigest():
@@ -75,6 +76,7 @@ class Worker:
                     return
 
     def stop(self):
+        print("Stopping...")
         self.time_stop = time.time()
         self.notify_master()
         sys.exit()
