@@ -87,7 +87,7 @@ class Worker:
         """
         res = requests.post('http://' + self.master_addr + '/status',
                             self.toJSON())
-        print("Pinged master at:", self.master_addr, res.status_code, r.text)
+        print("Pinged master at:", self.master_addr, res.status_code, res.text)
 
     def toJSON(self):
         """ Dumps our state to JSON such that we can send it to the master

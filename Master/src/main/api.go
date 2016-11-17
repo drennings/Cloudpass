@@ -40,6 +40,6 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("Err occurred in status: %v", err)
 	}
-	fmt.Printf("Received status update:%v", res)
+	fmt.Printf("Received status update:%s", res)
 	fmt.Fprintf(w, "Status update received")
 }
