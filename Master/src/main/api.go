@@ -9,19 +9,20 @@ import (
 // API is the object that is responsible for serving the API
 type API struct {
 	Port string
+	Man  *Manager
 }
 
 // NewAPI creates a new instance of the API
-func NewAPI(port string) *API {
+func NewAPI(port string, manager *Manager) *API {
 	return &API{
 		Port: port,
+		Man:  manager,
 	}
 }
 
 // Serve starts a webserver with the different handlers
 func (api *API) Serve() error {
 	// Register handlers
-	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/status", statusHandler)
 
 	// Start serving

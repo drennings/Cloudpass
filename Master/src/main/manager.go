@@ -76,12 +76,6 @@ func (man *Manager) startWorker(w *Worker) error {
 	return nil
 }
 
-// AttachAPI attaches an API object to the manager
-func (man *Manager) AttachAPI(api *API) {
-	man.API = api
-	go api.Serve()
-}
-
 // stopWorker stops a worker (running EC2 instance).
 func (man *Manager) stopWorker(worker *Worker) error {
 	fmt.Printf("%s: stopping worker.\n", worker.Id)

@@ -20,25 +20,29 @@ func main() {
 	fmt.Printf("Created manager in region %s\n", *region)
 
 	// Create and start the API
-	api := NewAPI(apiPort)
-	man.AttachAPI(api)
+	api := NewAPI(apiPort, man)
+	err := api.Serve()
+
+	if err != nil {
+		fmt.Printf("An error occurred: %v", err)
+	}
 	fmt.Printf("Started webserver on port %s\n", apiPort)
 
 	// Check if new records are added every 'pollInterval'
-	ticker := time.NewTicker(pollInterval)
-	for time := range ticker.C {
-		if record := newRecordAdded(); record != nil {
-			// Process new records
-			fmt.Printf("Processing record %s at %v.\n", record.Id, time.String())
+	//ticker := time.NewTicker(pollInterval)
+	//for time := range ticker.C {
+	if record := newRecordAdded(); record != nil {
+		// Process new records
+		//fmt.Printf("Processing record %s at %v.\n", record.Id, time.String())
 
-			// Create and start the job
-			job := JobFromRecord(record)
-			err := man.StartJob(job)
-			if err != nil {
-				fmt.Printf("An error occurred when starting job for record %s: %v", record.Id, err.Error())
-			}
+		// Create and start the job
+		job := JobFromRecord(record)
+		err := man.StartJob(job)
+		if err != nil {
+			fmt.Printf("An error occurred when starting job for record %s: %v", record.Id, err.Error())
 		}
 	}
+	//}
 }
 
 // newRecordAdded is a callback for new rows added to RDS
