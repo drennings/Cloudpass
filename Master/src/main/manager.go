@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -260,15 +261,8 @@ func (man *Manager) getWorkerInstance(w *Worker) (*ec2.Instance, error) {
 
 // Send a POST request with a portion of the job to the worker
 func (man *Manager) submitWork(worker *Worker, share int, job *Job) error {
-	resp, err := http.Get("http://myexternalip.com/raw")
-	if err != nil {
-		return err
-	}
-
-	ip, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
+	ip := GetLocalIP()
+	fmt.Printf("My IP: %s", ip)
 
 	work := &Work{
 		Id:       worker.Id,
@@ -283,6 +277,8 @@ func (man *Manager) submitWork(worker *Worker, share int, job *Job) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("Submitting work: %#", work)
 
 	workerAddr := fmt.Sprintf("http://%s", worker.PublicIpAddress)
 	resp, err = http.Post(workerAddr+"/start", "application/json", bytes.NewBuffer(workJSON))
@@ -325,4 +321,20 @@ func check(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func GetLocalIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return ""
+	}
+	for _, address := range addrs {
+		// check the address type and if it is not a loopback the display it
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return ""
 }
