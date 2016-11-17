@@ -281,7 +281,7 @@ func (man *Manager) submitWork(worker *Worker, share int, job *Job) error {
 	fmt.Printf("Submitting work: %#", work)
 
 	workerAddr := fmt.Sprintf("http://%s", worker.PublicIpAddress)
-	resp, err = http.Post(workerAddr+"/start", "application/json", bytes.NewBuffer(workJSON))
+	resp, err := http.Post(workerAddr+"/start", "application/json", bytes.NewBuffer(workJSON))
 	if err != nil {
 		return err
 	}
