@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -23,6 +24,7 @@ type Manager struct {
 	EC2Svc *ec2.EC2
 	API    *API
 	Jobs   map[string]*Job
+	m      sync.Mutex // Guards jobs
 }
 
 // NewManager returns a new Manager struct.
@@ -90,43 +92,42 @@ func (man *Manager) stopWorker(worker *Worker) error {
 // StartJob starts a job and starts the necessary workers
 func (man *Manager) StartJob(job *Job) error {
 	fmt.Printf("%s: starting job.\n", job.Id)
-	var errors []string
 
 	// Create and start a number of Workers equal to the capacity of the job
 	for i := 0; i < job.Capacity; i++ {
-		worker, err := man.createWorker(job, i)
-		if err != nil {
-			errors = append(errors, err.Error())
-		} else {
-			// Now that the worker is created, we tell it to start working
-			fmt.Println("Starting worker...")
-			err := man.startWorker(worker)
-			if err != nil {
-				return fmt.Errorf("Error starting worker: %v", err)
-			}
+		go man.createStartSubmit(job, i)
+	}
+	return nil
+}
 
-			fmt.Println("Submitting work...")
-			// Submit the work to the worker
-			err = man.submitWork(worker, i, job)
-			if err != nil {
-				return fmt.Errorf("Error submitting work: %v", err)
-			}
-
-			// Add it to the Workers map for tracking
-			job.Workers[worker.Id] = worker
-		}
+func (man *Manager) createStartSubmit(job *Job, i int) {
+	worker, err := man.createWorker(job, i)
+	fmt.Println("Starting worker...")
+	if err != nil {
+		fmt.Printf("Error creating worker: %v", err)
+		return
+	}
+	err = man.startWorker(worker)
+	if err != nil {
+		fmt.Printf("Error starting worker: %v", err)
+		return
 	}
 
-	if len(errors) > 0 {
-		return fmt.Errorf(strings.Join(errors, "; "))
+	fmt.Println("Submitting work...")
+	// Submit the work to the worker
+	err = man.submitWork(worker, i, job)
+	if err != nil {
+		fmt.Printf("Error submitting work: %v", err)
+		return
 	}
+
+	// Add it to the Workers map for tracking
+	man.m.Lock()
+	defer man.m.Unlock()
+	job.Workers[worker.Id] = worker
 
 	// Job was successfully started, add it to the manager
 	man.Jobs[job.Id] = job
-
-	// TODO trackHealth(job)
-
-	return nil
 }
 
 // StopJob stops a job and stops all its associated workers.
@@ -147,6 +148,8 @@ func (man *Manager) StopJob(job *Job) error {
 	}
 
 	// Job was successfully terminated, remove it from the manager
+	man.m.Lock()
+	defer man.m.Unlock()
 	delete(man.Jobs, job.Id)
 	return nil
 }

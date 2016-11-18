@@ -19,12 +19,9 @@ func main() {
 	fmt.Printf("Created manager in region %s\n", *region)
 
 	go func() {
-		// Check if new records are added every 'pollInterval'
-		//ticker := time.NewTicker(pollInterval)
-		//for time := range ticker.C {
 		if record := newRecordAdded(); record != nil {
 			// Process new records
-			//fmt.Printf("Processing record %s at %v.\n", record.Id, time.String())
+			fmt.Printf("Processing record %s at %v.\n", record.Id, time.Now())
 
 			// Create and start the job
 			job := JobFromRecord(record)
@@ -53,6 +50,6 @@ func newRecordAdded() *Record {
 		Hash:     "ef775988943825d2871e1cfa75473ec0",
 		HashType: "md5",
 		Name:     "Bob",
-		Capacity: 2,
+		Capacity: 3,
 	}
 }
