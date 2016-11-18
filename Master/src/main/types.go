@@ -51,5 +51,5 @@ type Work struct {
 	HashType string `json:"hashType"`
 	Share    int    `json:"share"`
 	Capacity int    `json:"cap"`
-	Length   int    `json:length`
+	Length   int    `json:"length"`
 }

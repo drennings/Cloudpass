@@ -37,7 +37,7 @@ class Worker:
         """
         print("Starting bruteforce for hash: " + self.hash_str)
 
-        #set_interval(self.notify_master, self.heartbeat_interval)
+        set_interval(self.notify_master, self.heartbeat_interval)
 
         # Bruteforce our share of the solution space
         self.time_start = time.time()
