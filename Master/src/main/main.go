@@ -51,5 +51,6 @@ func newRecordAdded() *Record {
 		HashType: "md5",
 		Name:     "Bob",
 		Capacity: 3,
+		Length:   7,
 	}
 }

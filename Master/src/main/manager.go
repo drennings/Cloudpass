@@ -274,6 +274,7 @@ func (man *Manager) submitWork(worker *Worker, share int, job *Job) error {
 		HashType: worker.HashType,
 		Share:    share,
 		Capacity: worker.Capacity,
+		Length:   worker.Length,
 	}
 
 	workJSON, err := json.Marshal(work)
@@ -304,6 +305,7 @@ func JobFromRecord(rec *Record) *Job {
 		Workers:   make(map[string]*Worker),
 		Hash:      rec.Hash,
 		HashType:  rec.HashType,
+		Length:    rec.Length,
 	}
 }
 

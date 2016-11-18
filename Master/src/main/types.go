@@ -19,6 +19,7 @@ type Record struct {
 	Timelimit time.Time
 	Hash      string
 	HashType  string
+	Length    int
 }
 
 // Job represents a single hash to be cracked.
@@ -31,6 +32,7 @@ type Job struct {
 	Timelimit time.Time
 	Hash      string
 	HashType  string
+	Length    int
 }
 
 // Worker represents a single EC2 instance used for a Job.
@@ -49,4 +51,5 @@ type Work struct {
 	HashType string `json:"hashType"`
 	Share    int    `json:"share"`
 	Capacity int    `json:"cap"`
+	Length   int    `json:length`
 }

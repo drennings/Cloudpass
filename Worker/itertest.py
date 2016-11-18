@@ -10,24 +10,24 @@ from flask import request
 app = Flask(__name__)
 
 alphabet = '0123456789'
-length = 7
 heartbeat = None
 
 
 class Worker:
     def __init__(self, worker_id, master_addr,
-                 hash_str, hash_type, share, capacity):
+                 hash_str, hash_type, share, capacity, length):
         self.worker_id = worker_id
         self.master_addr = master_addr
         self.hash_str = hash_str
         self.hash_type = hash_type
         self.share = share
         self.capacity = capacity
+        self.length = length
         self.heartbeat_interval = 10
         self.solution = None
         self.solutions_tried = 0
-        self.solutions_total = 0
-        for i in range(length+1):
+        self.solutions_total = -1 # We do not have passwords of length 0
+        for i in range(self.length+1):
             self.solutions_total += len(alphabet)**i
 
     def start(self):
@@ -37,7 +37,7 @@ class Worker:
         """
         print("Starting bruteforce for hash: " + self.hash_str)
 
-        set_interval(self.notify_master, self.heartbeat_interval)
+        #set_interval(self.notify_master, self.heartbeat_interval)
 
         # Bruteforce our share of the solution space
         self.time_start = time.time()
@@ -61,6 +61,7 @@ class Worker:
                 sol_ascii_bytes = bytes(sol)
                 hash_func.update(sol_ascii_bytes)
 
+                print(i, self.solutions_tried, self.solutions_total)
                 # Solution not found
                 if self.solutions_tried == self.solutions_total:
                     print("Did not find solution for hash " + self.hash_str)
@@ -122,8 +123,9 @@ def start():
     hash_type = json['hashType']
     share = int(json['share'])
     cap = int(json['cap'])
+    length = int(json['length'])
 
-    worker = Worker(worker_id, master_addr, hash_str, hash_type, share, cap)
+    worker = Worker(worker_id, master_addr, hash_str, hash_type, share, cap, length)
 
     print('Received request!')
     print(json)
