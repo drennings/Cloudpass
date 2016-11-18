@@ -183,7 +183,9 @@ func (man *Manager) runCommand(worker *Worker, cmd string) error {
 
 	// Open PEM file
 	pemPath := os.Getenv("PEM_PATH")
+	man.m.Lock()
 	pemBytes, err := ioutil.ReadFile(pemPath)
+	man.m.Unlock()
 	if err != nil {
 		return err
 	}
@@ -229,8 +231,8 @@ func (man *Manager) runCommand(worker *Worker, cmd string) error {
 	var stdoutBuf bytes.Buffer
 	session.Stdout = &stdoutBuf
 	err = session.Run(cmd)
-	if err != nil {
-		return err
+	for err != nil {
+		err = session.Run(cmd)
 	}
 	// fmt.Printf("> %s\n", stdoutBuf.String())
 
