@@ -222,19 +222,17 @@ func (man *Manager) runCommand(worker *Worker, cmd string) error {
 	}
 	defer conn.Close()
 
-	session, err := conn.NewSession()
-	if err != nil {
-		return err
-	}
-
-	defer session.Close()
 	var stdoutBuf bytes.Buffer
+	session, err := conn.NewSession()
+	for err != nil {
+		session, err = conn.NewSession()
+	}
 	session.Stdout = &stdoutBuf
 	err = session.Run(cmd)
 	for err != nil {
 		err = session.Run(cmd)
+		defer session.Close()
 	}
-	// fmt.Printf("> %s\n", stdoutBuf.String())
 
 	return nil
 }
@@ -283,7 +281,7 @@ func (man *Manager) submitWork(worker *Worker, share int, job *Job) error {
 		return err
 	}
 
-	fmt.Printf("Submitting work: %#", work)
+	fmt.Printf("Submitting work: %v", work)
 
 	workerAddr := fmt.Sprintf("http://%s", worker.PublicIpAddress)
 	resp, err := http.Post(workerAddr+"/start", "application/json", bytes.NewBuffer(workJSON))
