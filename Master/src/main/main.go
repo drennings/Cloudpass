@@ -47,10 +47,10 @@ func main() {
 func newRecordAdded() *Record {
 	return &Record{
 		Id:       "1",
-		Hash:     "283f42764da6dba2522412916b031080",
+		Hash:     "c8c605999f3d8352d7bb792cf3fdb25b",
 		HashType: "md5",
 		Name:     "Bob",
-		Capacity: 3,
-		Length:   7,
+		Capacity: 16,
+		Length:   9,
 	}
 }
