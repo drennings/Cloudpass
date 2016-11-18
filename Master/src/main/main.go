@@ -12,7 +12,7 @@ const pollInterval = 10 * time.Second
 const apiPort = ":80"
 
 func main() {
-	fmt.Println("Starting...")
+	fmt.Println("Start time: %v", time.Now())
 	// Create a Manager for the specified region.
 	region := aws.String(os.Getenv("AWS_REGION"))
 	man := NewManager(region)

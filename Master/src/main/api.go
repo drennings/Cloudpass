@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 )
 
 // API is the object that is responsible for serving the API
@@ -61,6 +62,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 
 	if len(solution) > 6 {
 		fmt.Printf("Found solution: %v", solution)
+		fmt.Printf("End time: %", time.Now())
 		os.Exit(0)
 	}
 
