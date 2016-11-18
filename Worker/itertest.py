@@ -86,7 +86,7 @@ class Worker:
         'heartbeat_interval' seconds as well as when the solution is found.
         """
         print("master addr: ", self.master_addr)
-        print("Pinging master at" + "http://"+self.master_addr +"/status")
+        print("Pinging master at" + "http://" + self.master_addr + "/status")
         res = requests.post('http://' + self.master_addr + '/status',
                             self.toJSON())
         print("Pinged master at:", self.master_addr, res.status_code, res.text)
@@ -133,5 +133,39 @@ def start():
 
     return 'Starting worker.'
 
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=80)
+    hash_str = '283f42764da6dba2522412916b031080'  # 9999999 (7)
+    solutions_tried = 0
+    solutions_total = 0
+    capacity = 1
+    share = 0
+    hash_type = 'md5'
+    for i in range(length+1):
+        for p in product(alphabet, repeat=i):
+            solutions_tried += 1
+
+            # Only do our share of the solution space
+            #if (solutions_tried % capacity) != share:
+            #    continue
+            sol = ''.join(p)
+            hash_func = None
+
+            # Determine hash function
+            if hash_type == "md5":
+                hash_func = hashlib.md5()
+            elif hash_type == "sha1":
+                hash_func = hashlib.sha1()
+
+            sol_ascii_bytes = bytes(sol)
+            hash_func.update(sol_ascii_bytes)
+
+            # Solution not found
+            if solutions_tried == solutions_total:
+                print("Did not find solution for hash " + hash_str)
+                break
+
+            # Solution found
+            if hash_str == hash_func.hexdigest():
+                print("Found solution for hash " + hash_str + ": " + str(sol))
+                break
