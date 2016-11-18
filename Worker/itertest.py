@@ -42,7 +42,7 @@ class Worker:
         # Bruteforce our share of the solution space
         self.time_start = time.time()
 
-        for i in range(length+1):
+        for i in range(self.length+1):
             for p in product(alphabet, repeat=i):
                 self.solutions_tried += 1
 
@@ -61,7 +61,6 @@ class Worker:
                 sol_ascii_bytes = bytes(sol)
                 hash_func.update(sol_ascii_bytes)
 
-                print(i, self.solutions_tried, self.solutions_total)
                 # Solution not found
                 if self.solutions_tried == self.solutions_total:
                     print("Did not find solution for hash " + self.hash_str)
