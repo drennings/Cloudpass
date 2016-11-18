@@ -50,7 +50,7 @@ func newRecordAdded() *Record {
 		Hash:     "c8c605999f3d8352d7bb792cf3fdb25b",
 		HashType: "md5",
 		Name:     "Bob",
-		Capacity: 8,
+		Capacity: 1,
 		Length:   9,
 	}
 }
